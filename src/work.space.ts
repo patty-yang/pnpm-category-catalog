@@ -1,8 +1,8 @@
 import type { IConfig, IWorkSpace, IWorkSpaceConfig, IWorkSpaceContext } from '@/types.ts'
 import { readFile } from 'node:fs/promises'
 import { confirm, multiselect, outro, text } from '@clack/prompts'
+import boxen from 'boxen'
 import { findUp } from 'find-up'
-import { yellow } from 'picocolors'
 import { parse, stringify } from 'yaml'
 import { CANCEL_PROCESS } from '@/constant.ts'
 import { isCancelProcess } from '@/utils.ts'
@@ -110,13 +110,18 @@ export const batchProcessCatalog = async (config: IWorkSpaceConfig): Promise<IWo
     if (!context.catalog) {
         // throw new Error('暂无 catalog')
         outro('')
-        console.log(`${yellow('╭ Warning ───────────────────────────────────────────────────────────────────────────────────╮')}
-${yellow('│')}                                                                                            ${yellow('│')}
-${yellow('│')}   If you have an existing workspace that you want to migrate to using catalogs,            ${yellow('│')}
-${yellow('│')}   you can use the following codemod:                                                       ${yellow('│')}
-${yellow('│')}   Run "pnpx codemod pnpm/catalog"                                                          ${yellow('│')}
-${yellow('│')}                                                                                            ${yellow('│')}
-${yellow('╰────────────────────────────────────────────────────────────────────────────────────────────╯')}`)
+        console.log(boxen(
+            `If you have an existing workspace that you want to migrate to using catalogs,
+you can use the following codemod:
+Run "pnpx codemod pnpm/catalog"`,
+            {
+                title: 'Warning',
+                padding: 1,
+                margin: 0,
+                borderStyle: 'round',
+                borderColor: 'yellow',
+            },
+        ))
         return null
     }
 

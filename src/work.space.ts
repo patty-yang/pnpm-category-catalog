@@ -68,12 +68,12 @@ export const getNewWorkSpaceYaml = async (config: any) => {
                 ...context.catalogs[categoryName],
                 ...dependencies,
             }
-            console.log(`已将选中的包合并到 catalogs.${categoryName} 节点中`)
+            // console.log(`已将选中的包合并到 catalogs.${categoryName} 节点中`)
         }
         else {
             // 节点不存在，直接赋值
             context.catalogs[categoryName] = dependencies
-            console.log(`已将选中的包添加到 catalogs.${categoryName} 节点中`)
+            // console.log(`已将选中的包添加到 catalogs.${categoryName} 节点中`)
         }
 
         // 将更新后的 context 写回到文件

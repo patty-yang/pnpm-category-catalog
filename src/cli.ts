@@ -12,17 +12,13 @@ const cli = cac(name)
 cli.command('')
     .action(async () => {
         const config = resolveConfig()
-        // console.log(config.cwd)
         const packagePathMap = await glob(['package.json', '*/**/package.json'], {
             cwd: config.cwd,
             ignore: ['**/node_modules/**'],
         })
-        // console.log(packagePathMap)
 
         const packageDependencies = packagePathMap.map(p => JSON.parse(readFileSync(resolve(config.cwd, p), 'utf-8')))
-        // console.log(packageDependencies)
         const workspace = await getNewWorkSpaceYaml(config)
-        // console.log(workspace)
 
         // 更新 package.json 中的依赖版本
         if (workspace && typeof workspace === 'object' && 'catalogs' in workspace && workspace.catalogs && workspace.catalogs.dependencies) {
@@ -36,12 +32,6 @@ function updatePackageDependencies(packagePathMap: any[], catalogs: any, cwd: st
     const dependencyTypes = ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']
 
     packagePathMap.forEach((path: any, index: number) => {
-        // const packagePaths = glob.sync(['package.json', '*/**/package.json'], {
-        //     cwd,
-        //     ignore: ['**/node_modules/**'],
-        // })
-        // const packagePath = packagePaths[index]
-
         const filePath = resolve(cwd, path)
         const context = JSON.parse(readFileSync(filePath, 'utf-8'))
 
@@ -63,11 +53,7 @@ function updatePackageDependencies(packagePathMap: any[], catalogs: any, cwd: st
 
         // 如果有更新，写回到文件
         if (updated) {
-            // console.log(context)
             writeFileSync(filePath, `${JSON.stringify(context, null, 2)}\n`, 'utf-8')
-        //     const fullPath = resolve(cwd, packagePath)
-        //     writeFileSync(fullPath, `${JSON.stringify(pkg, null, 2)}\n`, 'utf-8')
-        //     console.log(`已更新 ${fullPath}`)
         }
     })
 }

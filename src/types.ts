@@ -23,3 +23,13 @@ export interface IWorkSpaceYaml {
 }
 
 export type IWorkSpaceConfig = IConfig & IWorkSpace
+
+export interface IWorkSpaceContext {
+    path: string
+    context: string
+    catalogs: {
+        choice: string[]
+        name: string
+        dependencies: Record<string, string>
+    }
+}

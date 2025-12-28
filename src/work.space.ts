@@ -1,4 +1,4 @@
-import type { IConfig, IWorkSpace, IWorkSpaceConfig } from '@/types.ts'
+import type { IConfig, IWorkSpace, IWorkSpaceConfig, IWorkSpaceContext } from '@/types.ts'
 import { readFile } from 'node:fs/promises'
 import { multiselect, text } from '@clack/prompts'
 import { findUp } from 'find-up'
@@ -19,10 +19,10 @@ export const getWorkSpaceYaml = async (config: IConfig): Promise<IWorkSpace> => 
     }
 }
 
-export const getNewWorkSpaceYaml = async (config: IWorkSpaceConfig) => {
+export const getNewWorkSpaceYaml = async (config: IWorkSpaceConfig): Promise<IWorkSpaceContext> => {
     const context = config.workspace
     if (!context.catalog) {
-        return '暂无 catalog'
+        throw new Error('暂无 catalog')
     }
 
     const catalog = context.catalog
@@ -33,14 +33,13 @@ export const getNewWorkSpaceYaml = async (config: IWorkSpaceConfig) => {
             value: key,
             label: key,
         })),
-
-    })
+    }) as string[]
 
     const catalogsName = await text({
         message: '请输入自定义分类名称',
         placeholder: '',
         defaultValue: '',
-    })
+    }) as string
 
     // 将选择的结果与 catalog 匹配，得到 key: value 版本号
     const dependencies: Record<string, string> = {}
@@ -60,48 +59,45 @@ export const getNewWorkSpaceYaml = async (config: IWorkSpaceConfig) => {
     }
 
     // 检查 catalogsName 是否有值
-    if (catalogsName && typeof catalogsName === 'string' && catalogsName.trim()) {
-        const categoryName = catalogsName.trim()
+    if (!catalogsName) {
+        throw new Error('未输入有效的分类名称，操作已取消')
+    }
 
-        // 确保 context.catalogs 存在
-        if (!context.catalogs) {
-            context.catalogs = {}
-        }
+    // 确保 context.catalogs 存在
+    if (!context.catalogs) {
+        context.catalogs = {}
+    }
 
-        // 检查节点是否存在，存在则合并，不存在则创建
-        if (context.catalogs[categoryName]) {
-            // 节点已存在，合并 packages
-            context.catalogs[categoryName] = {
-                ...context.catalogs[categoryName],
-                ...dependencies,
-            }
-            // console.log(`已将选中的包合并到 catalogs.${categoryName} 节点中`)
+    // 检查节点是否存在，存在则合并，不存在则创建
+    if (context.catalogs[catalogsName]) {
+        // 节点已存在，合并 packages
+        context.catalogs[catalogsName] = {
+            ...context.catalogs[catalogsName],
+            ...dependencies,
         }
-        else {
-            // 节点不存在，直接赋值
-            context.catalogs[categoryName] = dependencies
-            // console.log(`已将选中的包添加到 catalogs.${categoryName} 节点中`)
-        }
-
-        // 将更新后的 context 写回到文件
-        return {
-            path: config.workSpaceYamlPath,
-            // 最终要替换 pnpm-workspace.yaml 内容
-            context: stringify(context, {
-                indent: 2,
-                lineWidth: 0,
-                minContentWidth: 0,
-            }),
-            // catalogs 新增节点内容
-            catalogs: {
-                choice,
-                name: catalogsName,
-                dependencies,
-            },
-
-        }
+        // console.log(`已将选中的包合并到 catalogs.${catalogsName} 节点中`)
     }
     else {
-        console.log('未输入有效的分类名称，操作已取消')
+        // 节点不存在，直接赋值
+        context.catalogs[catalogsName] = dependencies
+        // console.log(`已将选中的包添加到 catalogs.${catalogsName} 节点中`)
+    }
+
+    // 将更新后的 context 写回到文件
+    return {
+        path: config.workSpaceYamlPath,
+        // 最终要替换 pnpm-workspace.yaml 内容
+        context: stringify(context, {
+            indent: 2,
+            lineWidth: 0,
+            minContentWidth: 0,
+        }),
+        // catalogs 新增节点内容
+        catalogs: {
+            choice,
+            name: catalogsName,
+            dependencies,
+        },
+
     }
 }

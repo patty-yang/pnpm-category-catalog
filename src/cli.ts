@@ -28,7 +28,7 @@ cli.command('')
 
         // 更新 package.json 中的依赖版本
         if (workspace && typeof workspace === 'object' && 'catalogs' in workspace && workspace.catalogs && workspace.catalogs.dependencies) {
-            updatePackageDependencies(packagePathMap, workspace.catalogs, config.cwd)
+            updatePackageDependencies(config, packagePathMap, workspace)
 
             writeFileSync(workspace.path, stringifyYamlWithTopLevelBlankLine(workspace.context), 'utf-8')
         }

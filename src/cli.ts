@@ -1,4 +1,4 @@
-import { confirm, intro, log, outro } from '@clack/prompts'
+import { confirm, intro, log, outro, spinner } from '@clack/prompts'
 import cac from 'cac'
 import { glob } from 'glob'
 import pc from 'picocolors'
@@ -81,6 +81,9 @@ cli
                 )}`,
             )
 
+            const s = spinner()
+            s.start('pnpm-workspace.yaml processing...')
+
             // 显示创建的分类信息
             if (workspace.catalogs.categories) {
                 printTable(
@@ -122,7 +125,7 @@ cli
             )
             log.success('已更新 pnpm-workspace.yaml')
 
-            outro(`操作完成！备份 ID: ${pc.dim(backupId)}`)
+            s.stop(`Done. Congratulations, you have successfully managed. Back ID: ${pc.dim(backupId)}`)
         }
         catch (e) {
             outro(e as string)

@@ -84,6 +84,25 @@ cli
             const s = spinner()
             s.start('pnpm-workspace.yaml processing...')
 
+            // 更新 package.json 中的依赖版本
+            if (updatedFiles.length > 0) {
+                updatedFiles.forEach((i) => {
+                    writeFile(i.path, i.context)
+                })
+                log.success(`已更新 ${updatedFiles.length} 个 package.json 文件`)
+            }
+            else {
+                log.info('没有需要更新的 package.json 文件')
+            }
+
+            writeFile(
+                workspace.path,
+                stringifyYamlWithTopLevelBlankLine(workspace.context),
+            )
+            log.success('已更新 pnpm-workspace.yaml')
+
+            s.stop(`Done. Congratulations, you have successfully managed. Back ID: ${pc.dim(backupId)}`)
+
             // 显示创建的分类信息
             if (workspace.catalogs.categories) {
                 printTable(
@@ -107,25 +126,6 @@ cli
                     ),
                 )
             }
-
-            // 更新 package.json 中的依赖版本
-            if (updatedFiles.length > 0) {
-                updatedFiles.forEach((i) => {
-                    writeFile(i.path, i.context)
-                })
-                log.success(`已更新 ${updatedFiles.length} 个 package.json 文件`)
-            }
-            else {
-                log.info('没有需要更新的 package.json 文件')
-            }
-
-            writeFile(
-                workspace.path,
-                stringifyYamlWithTopLevelBlankLine(workspace.context),
-            )
-            log.success('已更新 pnpm-workspace.yaml')
-
-            s.stop(`Done. Congratulations, you have successfully managed. Back ID: ${pc.dim(backupId)}`)
         }
         catch (e) {
             outro(e as string)

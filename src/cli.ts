@@ -92,7 +92,7 @@ cli
                 // log.success(`已更新 ${updatedFiles.length} 个 package.json 文件`)
             }
             else {
-                log.info('没有需要更新的 package.json 文件')
+                log.error('没有需要更新的 package.json 文件')
             }
 
             writeFile(
